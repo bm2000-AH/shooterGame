@@ -71,21 +71,22 @@ def load_image(name, colorkey=None):
 
 
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, app, tile_type, pos_x, pos_y):
-        super().__init__(app.all_sprites)
+    def __init__(self, sh, tile_type, pos_x, pos_y):
+        super().__init__(sh.all_sprites)
         tile_images = {
-            'wall': app.load_image('box.png'),
-            'empty': app.load_image('grass.png')
+            'fin': sh.load_image('fin.png'),
+            'wall': sh.load_image('preg.png'),
+            'empty': sh.load_image('grass.jpg')
         }
 
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(
-            app.tile_width * pos_x, app.tile_height * pos_y)
+            sh.tile_width * pos_x, sh.tile_height * pos_y)
 
 
 class Hero(pygame.sprite.Sprite):
     def __init__(self, sh, pos):
-        super().__init__(sh.player_group)
+        super().__init__(sh.all_sprites, sh.player_group)
         self.choose = "pistol1.jpg"  # choose
         self.image = sh.load_image(self.choose)
         self.rect = self.image.get_rect()
@@ -96,6 +97,7 @@ class Hero(pygame.sprite.Sprite):
             self.sh.tile_width * pos[0] + 15, self.sh.tile_height * pos[1] + 5)
 
     def update(self, *pos):
+        print(pos)
         self.rect.x += pos[0]
         self.rect.y += pos[1]
         if pygame.sprite.spritecollideany(self, self.sh.tiles_group):
@@ -112,13 +114,13 @@ class ShooterGame(pygame.sprite.Sprite):
         self.width, self.height = 600, 600
         self.tile_width = self.tile_height = 50
         self.clock = pygame.time.Clock()
+        self.hero, level_x, level_y = self.generate_level(self.load_level('map.txt'))
         self.screen = pygame.display.set_mode((self.width, self.height))
         self.camera = Camera()
         pygame.display.set_caption('ShooterGame')
-        self.image = load_image('1location.jpg')
-        self.rect = self.image.get_rect()
+        """self.rect = self.image.get_rect()
         self.rect.x = 0
-        self.rect.y = 0
+        self.rect.y = 0"""
         self.hero = Hero
         self.fps = 30
 
@@ -129,8 +131,8 @@ class ShooterGame(pygame.sprite.Sprite):
 
 
     def update(self, pos):
-        self.rect.x += pos[0]
-        self.rect.y += pos[1]
+        """self.rect.x += pos[0]
+        self.rect.y += pos[1]"""
 
 
     def die_screen(self):
@@ -138,7 +140,7 @@ class ShooterGame(pygame.sprite.Sprite):
 
 
     def load_level(self, filename):
-        filename = "data/" + filename
+        filename = "photo/" + filename
         # читаем уровень, убирая символы перевода строки
         with open(filename, 'r') as mapFile:
             level_map = [line.strip() for line in mapFile]
@@ -158,6 +160,8 @@ class ShooterGame(pygame.sprite.Sprite):
                     Tile(self, 'empty', x, y)
                 elif level[y][x] == '#':
                     self.tiles_group.add(Tile(self, 'wall', x, y))
+                elif level[y][x] == 'F':
+                    self.tiles_group.add(Tile(self, 'fin', x, y))
                 elif level[y][x] == '@':
                     Tile(self, 'empty', x, y)
                     new_player = Hero(self, (x, y))
@@ -180,14 +184,6 @@ class ShooterGame(pygame.sprite.Sprite):
         """else:
             image = image.convert_alpha()"""
         return image
-
-
-    def generate_level(self, level):
-        new_player, x, y = None, None, None
-        self.rect = self.image.get_rect().move(
-            sh.tile_width * self.pos_x, sh.tile_height * self.pos_y)
-        # вернем игрока, а также размер поля в клетках
-        return new_player, x, y
 
 
     def start_screen(self):
@@ -247,7 +243,6 @@ class ShooterGame(pygame.sprite.Sprite):
                 live = 3
                 l = 1
 
-            self.screen.fill(pygame.Color('blue'))
             self.all_sprites.draw(self.screen)
             self.all_sprites.update()
             pygame.display.flip()
@@ -258,4 +253,5 @@ if __name__ == '__main__':
     sh = ShooterGame()
     sh.start_screen()
     sh.run_game()
+    sh.player_group()
     sh.end_screen()
