@@ -86,8 +86,8 @@ class Tile(pygame.sprite.Sprite):
 
 class Hero(pygame.sprite.Sprite):
     def __init__(self, sh, pos):
-        super().__init__(sh.all_sprites, sh.player_group)
-        self.choose = "pistol1.jpg"  # choose
+        super().__init__(sh.player_group)
+        self.choose = "pistol1.png"  # choose
         self.image = sh.load_image(self.choose)
         self.rect = self.image.get_rect()
         self.sh = sh
@@ -96,10 +96,10 @@ class Hero(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(
             self.sh.tile_width * pos[0] + 15, self.sh.tile_height * pos[1] + 5)
 
-    def update(self, *pos):
-        print(pos)
-        self.rect.x += pos[0]
-        self.rect.y += pos[1]
+    def update(self):
+        print(sh.dir)
+        self.rect.x += sh.dir[0]
+        self.rect.y += sh.dir[1]
         if pygame.sprite.spritecollideany(self, self.sh.tiles_group):
             self.rect.x -= pos[0]
             self.rect.y -= pos[1]
@@ -108,31 +108,58 @@ class Hero(pygame.sprite.Sprite):
 class ShooterGame(pygame.sprite.Sprite):
     def __init__(self, *group):
         pygame.init()
+        self.dir = (0, 0)
         self.all_sprites = pygame.sprite.Group()
         self.tiles_group = pygame.sprite.Group()
         self.player_group = pygame.sprite.Group()
         self.width, self.height = 600, 600
         self.tile_width = self.tile_height = 50
         self.clock = pygame.time.Clock()
-        self.hero, level_x, level_y = self.generate_level(self.load_level('map.txt'))
         self.screen = pygame.display.set_mode((self.width, self.height))
         self.camera = Camera()
         pygame.display.set_caption('ShooterGame')
-        """self.rect = self.image.get_rect()
-        self.rect.x = 0
-        self.rect.y = 0"""
-        self.hero = Hero
+        self.hero, level_x, level_y = self.generate_level(self.load_level('map.txt'))
         self.fps = 30
 
+    def run_game(self):
+        run = True
+        live = 3
+        l = 1
+
+        while run:
+            if l == 1:
+                self.start_screen()
+                l = 0
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.terminate()
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_1:
+                    live -= 1
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
+                    self.dir = (0, self.tile_height)
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
+                    self.hero.update((0, -self.tile_height))
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+                    self.hero.update(-self.tile_width, 0)
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+                    self.hero.update(self.tile_width, 0)
+            if live == 0:
+                self.end_screen()
+                live = 3
+                l = 1
+
+            self.all_sprites.draw(self.screen)
+            self.player_group.update()
+            self.player_group.draw(self.screen)
+            pygame.display.flip()
+            self.clock.tick(self.fps)
 
     def terminate(self):
         pygame.quit()
         sys.exit()
 
 
-    def update(self, pos):
-        """self.rect.x += pos[0]
-        self.rect.y += pos[1]"""
+
 
 
     def die_screen(self):
@@ -215,43 +242,12 @@ class ShooterGame(pygame.sprite.Sprite):
             self.clock.tick(self.fps)
 
 
-    def run_game(self):
-        run = True
-        live = 3
-        l = 1
 
-        while run:
-            if l == 1:
-                self.start_screen()
-                l = 0
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.terminate()
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_1:
-                    live -= 1
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_DOWN]:
-                self.hero.update((0, self.tile_height))
-            if keys[pygame.K_UP]:
-                self.hero.update((0, -self.tile_height))
-            if keys[pygame.K_LEFT]:
-                self.hero.update((-self.tile_width, 0))
-            if keys[pygame.K_RIGHT]:
-                self.hero.update((self.tile_width, 0))
-            if live == 0:
-                self.end_screen()
-                live = 3
-                l = 1
-
-            self.all_sprites.draw(self.screen)
-            self.all_sprites.update()
-            pygame.display.flip()
-            self.clock.tick(self.fps)
 
 
 if __name__ == '__main__':
     sh = ShooterGame()
-    sh.start_screen()
+    #sh.start_screen()
     sh.run_game()
     sh.player_group()
     sh.end_screen()
