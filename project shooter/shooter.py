@@ -144,8 +144,6 @@ class ShooterGame(pygame.sprite.Sprite):
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
                     self.dir = (self.tile_width, 0)
                 self.camera.update(self.hero)
-
-                # обновляем положение всех спрайтов
                 for sprite in self.player_group:
                     self.camera.apply(sprite)
 
@@ -155,6 +153,9 @@ class ShooterGame(pygame.sprite.Sprite):
                 self.player_group.draw(self.screen)
                 pygame.display.flip()
                 self.clock.tick(self.fps)
+
+                # обновляем положение всех спрайтов
+
 
 
             if live == 0:
