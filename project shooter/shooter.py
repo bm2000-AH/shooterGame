@@ -6,34 +6,6 @@ import random
 from pygame.constants import K_DOWN, K_LEFT, K_UP, K_RIGHT
 
 
-class AnimatedSprite(pygame.sprite.Sprite):
-    def __init__(self, sh, sheet, columns, rows, x, y):
-        super().__init__(sh.all_sprites)
-        self.frames = []
-        self.cut_sheet(sheet, columns, rows)
-        self.cur_frame = 0
-        self.image = self.frames[self.cur_frame]
-        self.rect = self.rect.move(x, y)
-
-    def cut_sheet(self, sheet, columns, rows):
-        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
-                                sheet.get_height() // rows)
-        for j in range(rows):
-            for i in range(columns):
-                frame_location = (self.rect.w * i, self.rect.h * j)
-                self.frames.shend(sheet.subsurface(pygame.Rect(
-                    frame_location, self.rect.size)))
-
-    def update(self):
-        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
-        self.image = self.frames[self.cur_frame]
-
-    def update(self):
-        self.flag += 1
-        if self.flag == 10:
-            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
-            self.image = self.frames[self.cur_frame]
-            self.flag = 0
 
 
 class Camera:
@@ -170,9 +142,9 @@ class ShooterGame(pygame.sprite.Sprite):
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
                     self.dir = 0
                     self.hero.move((self.tile_width, 0))
-                self.camera.update(self.hero)
+                """self.camera.update(self.hero)
                 for sprite in self.player_group:
-                    self.camera.apply(sprite)
+                    self.camera.apply(sprite)"""
 
                 self.all_sprites.draw(self.screen)
                 self.tiles_group.draw(self.screen)
