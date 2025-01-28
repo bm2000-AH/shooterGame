@@ -49,8 +49,8 @@ class Camera:
 
     # позиционировать камеру на объекте target
     def update(self, target):
-        self.dx = -(target.rect.x + target.rect.w // 2 - sh.width // 2)
-        self.dy = -(target.rect.y + target.rect.h // 2 - sh.height // 2)
+        self.dx = """-(target.rect.x + target.rect.w // 2 - sh.width // 2)"""
+        self.dy = """-(target.rect.y + target.rect.h // 2 - sh.height // 2)"""
 
 
 def load_image(name, colorkey=None):
@@ -85,8 +85,8 @@ class Tile(pygame.sprite.Sprite):
 
 
 class Hero(pygame.sprite.Sprite):
-    hero_images = {'up': 'pistol_up.png',
-                   'down': 'pistol_up.png',
+    hero_images = {'up': 'pistol1_up.png',
+                   'down': 'pistol1_up.png',
                    'r': 'pistol1.png',
                    'l': 'pistol1.png'}
 
@@ -183,26 +183,15 @@ class ShooterGame(pygame.sprite.Sprite):
 
                 # обновляем положение всех спрайтов
 
-
-
             if live == 0:
                 self.end_screen()
                 live = 3
                 l = 1
 
 
-
-
     def terminate(self):
         pygame.quit()
         sys.exit()
-
-
-
-
-
-    def die_screen(self):
-        self.image = load_image('fie.webp')
 
 
     def load_level(self, filename):
