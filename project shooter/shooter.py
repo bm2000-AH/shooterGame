@@ -43,7 +43,7 @@ class Camera:
         self.dy = 0
 
     # сдвинуть объект obj на смещение камеры
-    def shly(self, obj):
+    def apply(self, obj):
         obj.rect.x += self.dx
         obj.rect.y += self.dy
 
@@ -85,21 +85,44 @@ class Tile(pygame.sprite.Sprite):
 
 
 class Hero(pygame.sprite.Sprite):
+    hero_images = {'up': 'pistol_up.png',
+                   'down': 'pistol_up.png',
+                   'r': 'pistol1.png',
+                   'l': 'pistol1.png'}
+
     def __init__(self, sh, pos):
         super().__init__(sh.player_group)
-        self.choose = "pistol1.png"  # choose
-        self.image = sh.load_image(self.choose)
-        self.rect = self.image.get_rect()
         self.sh = sh
+        self.image = pygame.transform.scale(sh.load_image(Hero.hero_images['r']),
+                                            (self.sh.tile_width + 50, self.sh.tile_height))
+
+        self.rect = self.image.get_rect()
+
         # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(
             self.sh.tile_width * pos[0] + 15, self.sh.tile_height * pos[1] + 5)
 
-    def update(self):
-        print(sh.dir)
-        self.rect.x += sh.dir[0]
-        self.rect.y += sh.dir[1]
+    def rotate(self):
+        if self.sh.dir == 0:
+            self.image = pygame.transform.scale(sh.load_image(Hero.hero_images['r']),
+                                                (self.sh.tile_width + 50, self.sh.tile_height))
+        if self.sh.dir == 1:
+            self.image = pygame.transform.scale(sh.load_image(Hero.hero_images['up']),
+                                                (self.sh.tile_width, self.sh.tile_height + 50))
+        if self.sh.dir == 2:
+            self.image = pygame.transform.scale(sh.load_image(Hero.hero_images['l']),
+                                                (self.sh.tile_width + 50, self.sh.tile_height))
+        if self.sh.dir == 3:
+            self.image = pygame.transform.scale(sh.load_image(Hero.hero_images['down']),
+                                                (self.sh.tile_width, self.sh.tile_height + 50))
+
+
+    def move(self, pos):
+        self.rotate()
+
+        self.rect.x += pos[0]
+        self.rect.y += pos[1]
         if pygame.sprite.spritecollideany(self, self.sh.tiles_group):
             self.rect.x -= pos[0]
             self.rect.y -= pos[1]
@@ -108,7 +131,7 @@ class Hero(pygame.sprite.Sprite):
 class ShooterGame(pygame.sprite.Sprite):
     def __init__(self, *group):
         pygame.init()
-        self.dir = (0, 0)
+        self.dir = int()
         self.all_sprites = pygame.sprite.Group()
         self.tiles_group = pygame.sprite.Group()
         self.player_group = pygame.sprite.Group()
@@ -136,23 +159,39 @@ class ShooterGame(pygame.sprite.Sprite):
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_1:
                     live -= 1
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-                    self.dir = (0, self.tile_height)
+                    self.dir = 3
+                    self.hero.move((0, self.tile_height))
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-                    self.hero.update((0, -self.tile_height))
+                    self.dir = 1
+                    self.hero.move((0, -self.tile_height))
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-                    self.hero.update(-self.tile_width, 0)
+                    self.dir = 2
+                    self.hero.move((-self.tile_width, 0))
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-                    self.hero.update(self.tile_width, 0)
+                    self.dir = 0
+                    self.hero.move((self.tile_width, 0))
+                self.camera.update(self.hero)
+                for sprite in self.player_group:
+                    self.camera.apply(sprite)
+
+                self.all_sprites.draw(self.screen)
+                self.tiles_group.draw(self.screen)
+                self.player_group.update()
+                self.player_group.draw(self.screen)
+                pygame.display.flip()
+                self.clock.tick(self.fps)
+
+                # обновляем положение всех спрайтов
+
+
+
             if live == 0:
                 self.end_screen()
                 live = 3
                 l = 1
 
-            self.all_sprites.draw(self.screen)
-            self.player_group.update()
-            self.player_group.draw(self.screen)
-            pygame.display.flip()
-            self.clock.tick(self.fps)
+
+
 
     def terminate(self):
         pygame.quit()
