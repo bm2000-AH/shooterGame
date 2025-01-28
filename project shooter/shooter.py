@@ -6,34 +6,6 @@ import random
 from pygame.constants import K_DOWN, K_LEFT, K_UP, K_RIGHT
 
 
-class AnimatedSprite(pygame.sprite.Sprite):
-    def __init__(self, sh, sheet, columns, rows, x, y):
-        super().__init__(sh.all_sprites)
-        self.frames = []
-        self.cut_sheet(sheet, columns, rows)
-        self.cur_frame = 0
-        self.image = self.frames[self.cur_frame]
-        self.rect = self.rect.move(x, y)
-
-    def cut_sheet(self, sheet, columns, rows):
-        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
-                                sheet.get_height() // rows)
-        for j in range(rows):
-            for i in range(columns):
-                frame_location = (self.rect.w * i, self.rect.h * j)
-                self.frames.shend(sheet.subsurface(pygame.Rect(
-                    frame_location, self.rect.size)))
-
-    def update(self):
-        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
-        self.image = self.frames[self.cur_frame]
-
-    def update(self):
-        self.flag += 1
-        if self.flag == 10:
-            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
-            self.image = self.frames[self.cur_frame]
-            self.flag = 0
 
 
 class Camera:
@@ -49,8 +21,8 @@ class Camera:
 
     # позиционировать камеру на объекте target
     def update(self, target):
-        self.dx = -(target.rect.x + target.rect.w // 2 - sh.width // 2)
-        self.dy = -(target.rect.y + target.rect.h // 2 - sh.height // 2)
+        self.dx = """-(target.rect.x + target.rect.w // 2 - sh.width // 2)"""
+        self.dy = """-(target.rect.y + target.rect.h // 2 - sh.height // 2)"""
 
 
 def load_image(name, colorkey=None):
@@ -85,30 +57,53 @@ class Tile(pygame.sprite.Sprite):
 
 
 class Hero(pygame.sprite.Sprite):
+    hero_images = {'up': 'pistol1_up.png',
+                   'down': 'pistol1_down.png',
+                   'r': 'pistol1.png',
+                   'l': 'pistol1_left.png'}
+
     def __init__(self, sh, pos):
         super().__init__(sh.player_group)
-        self.choose = "pistol1.png"  # choose
-        self.image = sh.load_image(self.choose)
-        self.rect = self.image.get_rect()
         self.sh = sh
+        self.image = pygame.transform.scale(sh.load_image(Hero.hero_images['r']),
+                                            (self.sh.tile_width + 50, self.sh.tile_height))
+
+        self.rect = self.image.get_rect()
+
         # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(
             self.sh.tile_width * pos[0] + 15, self.sh.tile_height * pos[1] + 5)
 
-    def update(self):
-        print(sh.dir)
-        self.rect.x += sh.dir[0]
-        self.rect.y += sh.dir[1]
+    def rotate(self):
+        if self.sh.dir == 0:
+            self.image = pygame.transform.scale(sh.load_image(Hero.hero_images['r']),
+                                                (self.sh.tile_width + 50, self.sh.tile_height))
+        if self.sh.dir == 1:
+            self.image = pygame.transform.scale(sh.load_image(Hero.hero_images['up']),
+                                                (self.sh.tile_width, self.sh.tile_height + 50))
+        if self.sh.dir == 2:
+            self.image = pygame.transform.scale(sh.load_image(Hero.hero_images['l']),
+                                                (self.sh.tile_width + 50, self.sh.tile_height))
+        if self.sh.dir == 3:
+            self.image = pygame.transform.scale(sh.load_image(Hero.hero_images['down']),
+                                                (self.sh.tile_width, self.sh.tile_height + 50))
+
+
+    def move(self, pos):
+        self.rotate()
+
+        self.rect.x += pos[0]
+        self.rect.y += pos[1]
         if pygame.sprite.spritecollideany(self, self.sh.tiles_group):
-            self.rect.x -= sh.dir[0]
-            self.rect.y -= sh.dir[1]
+            self.rect.x -= pos[0]
+            self.rect.y -= pos[1]
 
 
 class ShooterGame(pygame.sprite.Sprite):
     def __init__(self, *group):
         pygame.init()
-        self.dir = (0, 0)
+        self.dir = int()
         self.all_sprites = pygame.sprite.Group()
         self.tiles_group = pygame.sprite.Group()
         self.player_group = pygame.sprite.Group()
@@ -136,16 +131,20 @@ class ShooterGame(pygame.sprite.Sprite):
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_1:
                     live -= 1
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-                    self.dir = (0, self.tile_height)
+                    self.dir = 3
+                    self.hero.move((0, self.tile_height))
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-                    self.dir = (0, -self.tile_height)
+                    self.dir = 1
+                    self.hero.move((0, -self.tile_height))
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-                    self.dir = (-self.tile_width, 0)
+                    self.dir = 2
+                    self.hero.move((-self.tile_width, 0))
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-                    self.dir = (self.tile_width, 0)
-                self.camera.update(self.hero)
+                    self.dir = 0
+                    self.hero.move((self.tile_width, 0))
+                """self.camera.update(self.hero)
                 for sprite in self.player_group:
-                    self.camera.apply(sprite)
+                    self.camera.apply(sprite)"""
 
                 self.all_sprites.draw(self.screen)
                 self.tiles_group.draw(self.screen)
@@ -156,26 +155,15 @@ class ShooterGame(pygame.sprite.Sprite):
 
                 # обновляем положение всех спрайтов
 
-
-
             if live == 0:
                 self.end_screen()
                 live = 3
                 l = 1
 
 
-
-
     def terminate(self):
         pygame.quit()
         sys.exit()
-
-
-
-
-
-    def die_screen(self):
-        self.image = load_image('fie.webp')
 
 
     def load_level(self, filename):
