@@ -142,6 +142,7 @@ class ShooterGame(pygame.sprite.Sprite):
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
                     self.dir = 0
                     self.hero.move((self.tile_width, 0))
+
                 """self.camera.update(self.hero)
                 for sprite in self.player_group:
                     self.camera.apply(sprite)"""
