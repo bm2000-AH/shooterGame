@@ -5,7 +5,6 @@ import random
 
 from pygame.constants import K_DOWN, K_LEFT, K_UP, K_RIGHT
 
-
 class Camera:
     # зададим начальный сдвиг камеры
     def init(self):
