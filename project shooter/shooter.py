@@ -6,8 +6,6 @@ import random
 from pygame.constants import K_DOWN, K_LEFT, K_UP, K_RIGHT
 
 
-
-
 class Camera:
     # зададим начальный сдвиг камеры
     def init(self):
@@ -21,8 +19,8 @@ class Camera:
 
     # позиционировать камеру на объекте target
     def update(self, target):
-        self.dx = """-(target.rect.x + target.rect.w // 2 - sh.width // 2)"""
-        self.dy = """-(target.rect.y + target.rect.h // 2 - sh.height // 2)"""
+        self.dx = -(target.rect.x + target.rect.w // 2 - sh.width // 2)
+        self.dy = -(target.rect.y + target.rect.h // 2 - sh.height // 2)
 
 
 def load_image(name, colorkey=None):
@@ -52,6 +50,7 @@ class Tile(pygame.sprite.Sprite):
         }
 
         self.image = tile_images[tile_type]
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(
             sh.tile_width * pos_x, sh.tile_height * pos_y)
 
@@ -63,39 +62,38 @@ class Hero(pygame.sprite.Sprite):
                    'l': 'pistol1_left.png'}
 
     def __init__(self, sh, pos):
-        super().__init__(sh.player_group)
+        super().__init__(sh.player_group, sh.all_sprites)
         self.sh = sh
         self.image = pygame.transform.scale(sh.load_image(Hero.hero_images['r']),
-                                            (self.sh.tile_width + 50, self.sh.tile_height))
+                                            (self.sh.tile_width, self.sh.tile_height))
 
         self.rect = self.image.get_rect()
 
         # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(
-            self.sh.tile_width * pos[0] + 15, self.sh.tile_height * pos[1] + 5)
+            self.sh.tile_width * pos[0], self.sh.tile_height * pos[1])
 
     def rotate(self):
         if self.sh.dir == 0:
             self.image = pygame.transform.scale(sh.load_image(Hero.hero_images['r']),
-                                                (self.sh.tile_width + 50, self.sh.tile_height))
+                                                (self.sh.tile_width, self.sh.tile_height))
         if self.sh.dir == 1:
             self.image = pygame.transform.scale(sh.load_image(Hero.hero_images['up']),
-                                                (self.sh.tile_width, self.sh.tile_height + 50))
+                                                (self.sh.tile_width, self.sh.tile_height))
         if self.sh.dir == 2:
             self.image = pygame.transform.scale(sh.load_image(Hero.hero_images['l']),
-                                                (self.sh.tile_width + 50, self.sh.tile_height))
+                                                (self.sh.tile_width, self.sh.tile_height))
         if self.sh.dir == 3:
             self.image = pygame.transform.scale(sh.load_image(Hero.hero_images['down']),
-                                                (self.sh.tile_width, self.sh.tile_height + 50))
-
+                                                (self.sh.tile_width, self.sh.tile_height))
 
     def move(self, pos):
         self.rotate()
-
         self.rect.x += pos[0]
         self.rect.y += pos[1]
-        if pygame.sprite.spritecollideany(self, self.sh.tiles_group):
+        if pygame.sprite.spritecollide(self, self.sh.tiles_group, False):
+            print("hi")
             self.rect.x -= pos[0]
             self.rect.y -= pos[1]
 
@@ -106,6 +104,7 @@ class ShooterGame(pygame.sprite.Sprite):
         self.dir = int()
         self.all_sprites = pygame.sprite.Group()
         self.tiles_group = pygame.sprite.Group()
+        self.F = pygame.sprite.Group()
         self.player_group = pygame.sprite.Group()
         self.width, self.height = 600, 600
         self.tile_width = self.tile_height = 50
@@ -142,9 +141,9 @@ class ShooterGame(pygame.sprite.Sprite):
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
                     self.dir = 0
                     self.hero.move((self.tile_width, 0))
-                """self.camera.update(self.hero)
-                for sprite in self.player_group:
-                    self.camera.apply(sprite)"""
+                self.camera.update(self.hero)
+                for sprite in self.all_sprites:
+                    self.camera.apply(sprite)
 
                 self.all_sprites.draw(self.screen)
                 self.tiles_group.draw(self.screen)
@@ -160,11 +159,9 @@ class ShooterGame(pygame.sprite.Sprite):
                 live = 3
                 l = 1
 
-
     def terminate(self):
         pygame.quit()
         sys.exit()
-
 
     def load_level(self, filename):
         filename = "photo/" + filename
@@ -178,7 +175,6 @@ class ShooterGame(pygame.sprite.Sprite):
         # дополняем каждую строку пустыми клетками ('.')
         return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
-
     def generate_level(self, level):
         new_player, x, y = None, None, None
         for y in range(len(level)):
@@ -188,13 +184,12 @@ class ShooterGame(pygame.sprite.Sprite):
                 elif level[y][x] == '#':
                     self.tiles_group.add(Tile(self, 'wall', x, y))
                 elif level[y][x] == 'F':
-                    self.tiles_group.add(Tile(self, 'fin', x, y))
+                    self.F.add(Tile(self, 'fin', x, y))
                 elif level[y][x] == '@':
                     Tile(self, 'empty', x, y)
                     new_player = Hero(self, (x, y))
         # вернем игрока, а также размер поля в клетках
         return new_player, x, y
-
 
     def load_image(self, name, colorkey=None):
         fullname = os.path.join('photo', name)
@@ -212,7 +207,6 @@ class ShooterGame(pygame.sprite.Sprite):
             image = image.convert_alpha()"""
         return image
 
-
     def start_screen(self):
         self.screen.fill(pygame.Color('red'))
         while True:
@@ -224,7 +218,6 @@ class ShooterGame(pygame.sprite.Sprite):
                     return  # начинаем игру
             pygame.display.flip()
             self.clock.tick(self.fps)
-
 
     def end_screen(self):
         self.screen.fill(pygame.Color('black'))
@@ -242,12 +235,9 @@ class ShooterGame(pygame.sprite.Sprite):
             self.clock.tick(self.fps)
 
 
-
-
-
 if __name__ == '__main__':
     sh = ShooterGame()
-    #sh.start_screen()
+    # sh.start_screen()
     sh.run_game()
     sh.player_group()
     sh.end_screen()
