@@ -239,10 +239,25 @@ class ShooterGame(pygame.sprite.Sprite):
     def location3(self):
         self.screen.fill(pygame.Color('black'))
 
-    def end_screen(self):
-        self.screen.fill(pygame.Color('black'))
+    def end_screen(self, time=1, timez=7):
+
+        intro_text = [f"Общее время: {time}",
+                      f"Время потраченное на задания: {timez}"]
+
+        fon = pygame.transform.scale(self.load_image('fie.webp'), (self.width, self.height))
+        self.screen.blit(fon, (0, 0))
+        font = pygame.font.Font(None, 30)
+        text_coord = 50
+        for line in intro_text:
+            string_rendered = font.render(line, 1, pygame.Color('white'))
+            intro_rect = string_rendered.get_rect()
+            text_coord += 10
+            intro_rect.top = text_coord
+            intro_rect.x = 10
+            text_coord += intro_rect.height
+            self.screen.blit(string_rendered, intro_rect)
         fon = pygame.transform.scale(self.load_image('fie.webp'), (self.width, self.height - 200))
-        self.screen.blit(fon, (-40, 100))
+        self.screen.blit(fon, (-20, 150))
 
         while True:
             for event in pygame.event.get():
