@@ -46,6 +46,7 @@ class Tile(pygame.sprite.Sprite):
             'fin': sh.load_image('fin.png'),
             'wall': sh.load_image('preg.png'),
             'empty': sh.load_image('grass.jpg'),
+            'base': sh.load_image('basement.jpg')
         }
 
         self.image = tile_images[tile_type]
@@ -98,15 +99,11 @@ class Hero(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(self, self.sh.F, False):
             print("yes")
             sh.end_screen()
-
-
-class Keyboard:
-    def __init__(self):
-        self.p
     def test(self):
-        if pygame.sprite.spritecollide(self, self.p, False) and pygame.event.get().event.key == self.b:
+        if pygame.sprite.spritecollide(self, self.sh.L, False):
             print("y")
-            self.sh.location3()
+            self.sh.load_image("3location.jpg")
+
 class ShooterGame(pygame.sprite.Sprite):
     def __init__(self, *group):
         pygame.init()
@@ -123,7 +120,6 @@ class ShooterGame(pygame.sprite.Sprite):
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((self.width, self.height))
         self.camera = Camera()
-        self.keyboard = Keyboard()
         pygame.display.set_caption('ShooterGame')
         self.hero, level_x, level_y = self.generate_level(self.load_level('map.txt'))
         self.fps = 30
@@ -143,7 +139,7 @@ class ShooterGame(pygame.sprite.Sprite):
                 if event.type == pygame.KEYDOWN and event.key == 102:
                     self.b = 102
                     self.p = self.L
-                    self.keyboard.test()
+                    self.hero.test()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_1:
                     live -= 1
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
@@ -204,6 +200,8 @@ class ShooterGame(pygame.sprite.Sprite):
                     self.tiles_group.add(Tile(self, 'wall', x, y))
                 elif level[y][x] == 'F':
                     self.F.add(Tile(self, 'fin', x, y))
+                elif level[y][x] == 'L':
+                    self.L.add(Tile(self, 'base', x, y))
                 elif level[y][x] == '@':
                     Tile(self, 'empty', x, y)
                     new_player = Hero(self, (x, y))
@@ -259,7 +257,7 @@ class ShooterGame(pygame.sprite.Sprite):
 
 if __name__ == '__main__':
     sh = ShooterGame()
-    # sh.start_screen()
+    sh.start_screen()
     sh.run_game()
     sh.player_group()
     sh.end_screen()
