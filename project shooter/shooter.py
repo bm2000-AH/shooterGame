@@ -239,6 +239,7 @@ class ShooterGame(pygame.sprite.Sprite):
     def location3(self):
         self.screen.fill(pygame.Color('black'))
 
+
     def end_screen(self, time=1, timez=7):
 
         intro_text = [f"Общее время: {time}",
