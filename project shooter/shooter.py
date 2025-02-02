@@ -99,8 +99,8 @@ class Hero(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(self, self.sh.F, False):
             print("yes")
             sh.end_screen()
-    def test(self):
-        if pygame.sprite.spritecollide(self, self.sh.L, False):
+    def test(self, k):
+        if pygame.sprite.spritecollide(self, self.sh.L, False) and k == 102:
             self.sh.loc = 2
             print("y")
             self.sh.load_image("3location.jpg")
@@ -117,6 +117,7 @@ class ShooterGame(pygame.sprite.Sprite):
         self.til = pygame.sprite.Group()
         self.F = pygame.sprite.Group()
         self.L = pygame.sprite.Group()
+        self.H = pygame.sprite.Group()
         self.player_group = pygame.sprite.Group()
         self.width, self.height = 600, 600
         self.tile_width = self.tile_height = 50
@@ -140,9 +141,7 @@ class ShooterGame(pygame.sprite.Sprite):
                 if event.type == pygame.QUIT:
                     self.terminate()
                 if event.type == pygame.KEYDOWN and event.key == 102:
-                    self.b = 102
-                    self.p = self.L
-                    self.hero.test()
+                    self.hero.test(102)
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_1:
                     live -= 1
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
@@ -203,6 +202,8 @@ class ShooterGame(pygame.sprite.Sprite):
                     self.tiles_group.add(Tile(self, 'wall', x, y))
                 elif level[y][x] == 'F':
                     self.F.add(Tile(self, 'fin', x, y))
+                elif level[y][x] == 'H':
+                    self.H.add(Tile(self, 'pit', x, y))
                 elif level[y][x] == 'L':
                     self.L.add(Tile(self, 'base', x, y))
                 elif level[y][x] == '@':
