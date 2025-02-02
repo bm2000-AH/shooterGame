@@ -101,12 +101,15 @@ class Hero(pygame.sprite.Sprite):
             sh.end_screen()
     def test(self):
         if pygame.sprite.spritecollide(self, self.sh.L, False):
+            self.sh.loc = 2
             print("y")
             self.sh.load_image("3location.jpg")
+            self.sh.hero, level_x, level_y = self.sh.generate_level(self.sh.load_level(self.sh.loc))
 
 class ShooterGame(pygame.sprite.Sprite):
     def __init__(self, *group):
         pygame.init()
+        self.loc = 1
         self.dir = int()
         self.b = int()
         self.all_sprites = pygame.sprite.Group()
@@ -121,7 +124,7 @@ class ShooterGame(pygame.sprite.Sprite):
         self.screen = pygame.display.set_mode((self.width, self.height))
         self.camera = Camera()
         pygame.display.set_caption('ShooterGame')
-        self.hero, level_x, level_y = self.generate_level(self.load_level('map.txt'))
+        self.hero, level_x, level_y = self.generate_level(self.load_level(self.loc))
         self.fps = 30
 
     def run_game(self):
@@ -235,9 +238,6 @@ class ShooterGame(pygame.sprite.Sprite):
                     return  # начинаем игру
             pygame.display.flip()
             self.clock.tick(self.fps)
-
-    def location3(self):
-        self.screen.fill(pygame.Color('black'))
 
     def end_screen(self, time=1, timez=7):
 
