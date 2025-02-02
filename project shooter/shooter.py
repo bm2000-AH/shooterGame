@@ -5,7 +5,6 @@ import random
 
 from pygame.constants import K_DOWN, K_LEFT, K_UP, K_RIGHT
 
-
 class Camera:
     # зададим начальный сдвиг камеры
     def init(self):
@@ -100,12 +99,10 @@ class Hero(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(self, self.sh.F, False):
             print("yes")
             sh.end_screen()
-
     def test(self):
         if pygame.sprite.spritecollide(self, self.sh.L, False):
             print("y")
             self.sh.load_image("3location.jpg")
-
 
 class ShooterGame(pygame.sprite.Sprite):
     def __init__(self, *group):
@@ -228,31 +225,13 @@ class ShooterGame(pygame.sprite.Sprite):
         return image
 
     def start_screen(self):
-        intro_text = ["                            ShootOGEym", "",
-                      "                 Это игра с повторением заданий экзаменов",
-                      "                 Побеждайте монстров,",
-                      "                 Переходите на локации,",
-                      "                 Открывайте сундуки,",
-                      "                 Выполняйте задания", "",
-                      "                         Нажмите G, чтобы начать игру"]
-
-        fon = pygame.transform.scale(self.load_image('startscreen.jpg'), (self.width, self.height))
-        self.screen.blit(fon, (0, 0))
-        font = pygame.font.Font(None, 30)
-        text_coord = 50
-        for line in intro_text:
-            string_rendered = font.render(line, 1, pygame.Color('Brown'))
-            intro_rect = string_rendered.get_rect()
-            text_coord += 10
-            intro_rect.top = text_coord
-            intro_rect.x = 10
-            text_coord += intro_rect.height
-            self.screen.blit(string_rendered, intro_rect)
+        self.screen.fill(pygame.Color('red'))
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.terminate()
-                elif event.type == pygame.KEYDOWN and event.key == 103:
+                elif event.type == pygame.KEYDOWN or \
+                        event.type == pygame.MOUSEBUTTONDOWN:
                     return  # начинаем игру
             pygame.display.flip()
             self.clock.tick(self.fps)
