@@ -5,9 +5,32 @@ import random
 
 from pygame.constants import K_DOWN, K_LEFT, K_UP, K_RIGHT
 
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, sh, x, y, direction):
+        super().__init__(sh.bullets_group, sh.all_sprites)
+        self.sh = sh
+        self.image = pygame.transform.scale(sh.load_image('bullet.png'), (15, 15))
+        self.rect = self.image.get_rect(center=(x, y))
+        self.speed = 10
+        self.direction = direction
+
+    def update(self):
+        if self.direction == 0:  # Вправо
+            self.rect.x += self.speed
+        elif self.direction == 1:  # Вверх
+            self.rect.y -= self.speed
+        elif self.direction == 2:  # Влево
+            self.rect.x -= self.speed
+        elif self.direction == 3:  # Вниз
+            self.rect.y += self.speed
+
+        # Удаляем пулю, если она выходит за границы экрана
+        if not self.sh.screen.get_rect().colliderect(self.rect):
+            self.kill()
+
 class Camera:
     # зададим начальный сдвиг камеры
-    def init(self):
+    def __init__(self):
         self.dx = 0
         self.dy = 0
 
@@ -61,6 +84,10 @@ class Hero(pygame.sprite.Sprite):
                    'r': 'pistol1.png',
                    'l': 'pistol1_left.png'}
 
+    def shoot(self):
+        bullet_x, bullet_y = self.rect.center
+        Bullet(self.sh, bullet_x, bullet_y, self.sh.dir)
+
     def __init__(self, sh, pos):
         super().__init__(sh.player_group, sh.all_sprites)
         self.sh = sh
@@ -111,6 +138,7 @@ class ShooterGame(pygame.sprite.Sprite):
         self.b = int()
         self.all_sprites = pygame.sprite.Group()
         self.tiles_group = pygame.sprite.Group()
+        self.bullets_group = pygame.sprite.Group()
         self.til = pygame.sprite.Group()
         self.F = pygame.sprite.Group()
         self.L = pygame.sprite.Group()
@@ -121,7 +149,7 @@ class ShooterGame(pygame.sprite.Sprite):
         self.screen = pygame.display.set_mode((self.width, self.height))
         self.camera = Camera()
         pygame.display.set_caption('ShooterGame')
-        self.hero, level_x, level_y = self.generate_level(self.load_level('map.txt'))
+        self.hero, level_x, level_y = self.generate_level(self.load_level('map1.txt'))
         self.fps = 30
 
     def run_game(self):
@@ -154,12 +182,16 @@ class ShooterGame(pygame.sprite.Sprite):
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
                     self.dir = 0
                     self.hero.move((self.tile_width, 0))
+
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    self.hero.shoot()
                 if event.type == pygame.KEYDOWN:
                     print(event.key)
                 self.camera.update(self.hero)
                 for sprite in self.all_sprites:
                     self.camera.apply(sprite)
 
+                self.bullets_group.update()
                 self.all_sprites.draw(self.screen)
                 self.tiles_group.draw(self.screen)
                 self.player_group.update()
