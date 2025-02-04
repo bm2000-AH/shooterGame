@@ -75,7 +75,16 @@ class Tile(pygame.sprite.Sprite):
             'wl': sh.load_image('wall_left.jpg'),
             'wu': sh.load_image('wall_up.jpg'),
             'wd': sh.load_image('wall_down.jpg'),
-            'wr': sh.load_image('wall_right.jpg')
+            'wr': sh.load_image('wall_right.jpg'),
+            'stair': sh.load_image('stair.jpg'),
+            'pit': sh.load_image('pit.jpg'),
+            'hatch': sh.load_image('hatch.jpg'),
+            'pol': sh.load_image('pol.jpg'),
+            'black': sh.load_image('black.jpg'),
+            'rd': sh.load_image('wall_colliderd.jpg'),
+            'ru': sh.load_image('wall_collideru.jpg'),
+            'lu': sh.load_image('wall_collidelu.jpg'),
+            'ld': sh.load_image('wall_collideld.jpg')
 
         }
 
@@ -138,6 +147,14 @@ class Hero(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(self, self.sh.L, False):
             print("y")
             self.sh.m = "map3.txt"
+            self.sh.all_sprites = pygame.sprite.Group()
+            self.sh.tiles_group = pygame.sprite.Group()
+            self.sh.bullets_group = pygame.sprite.Group()
+            self.sh.til = pygame.sprite.Group()
+            self.sh.F = pygame.sprite.Group()
+            self.sh.L = pygame.sprite.Group()
+            self.sh.player_group = pygame.sprite.Group()
+            self.sh.screen.fill((17, 11, 25))
             self.sh.hero, level_x, level_y = self.sh.generate_level(self.sh.load_level(self.sh.m))
 
 
@@ -234,13 +251,28 @@ class ShooterGame(pygame.sprite.Sprite):
         return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
     def generate_level(self, level):
+        k = ""
         new_player, x, y = None, None, None
         for y in range(len(level)):
             for x in range(len(level[y])):
                 if level[y][x] == '.':
+                    k = "empty"
                     Tile(self, 'empty', x, y)
-                if level[y][x] == ',':
-                    Tile(self, 'empty', x, y)
+                elif level[y][x] == 'H':
+                    Tile(self, 'hatch', x, y)
+                elif level[y][x] == '(':
+                    Tile(self, 'ld', x, y)
+                elif level[y][x] == ')':
+                    Tile(self, 'ru', x, y)
+                elif level[y][x] == '[':
+                    Tile(self, 'lu', x, y)
+                elif level[y][x] == ']':
+                    Tile(self, 'rd', x, y)
+                elif level[y][x] == ',':
+                    self.tiles_group.add(Tile(self, 'black', x, y))
+                elif level[y][x] == '*':
+                    k = "pol"
+                    Tile(self, 'pol', x, y)
                 elif level[y][x] == '#':
                     self.tiles_group.add(Tile(self, 'wall', x, y))
                 elif level[y][x] == 'D':
@@ -253,12 +285,14 @@ class ShooterGame(pygame.sprite.Sprite):
                     self.tiles_group.add(Tile(self, 'wr', x, y))
                 elif level[y][x] == 'F':
                     self.F.add(Tile(self, 'fin', x, y))
-                elif level[y][x] == 'L':
+                elif level[y][x] == 'B':
                     self.L.add(Tile(self, 'base', x, y))
+                elif level[y][x] == 'S':
+                    self.L.add(Tile(self, 'stair', x, y))
                 elif level[y][x] == 'P':
-                    self.L.add(Tile(self, 'base', x, y))
+                    self.L.add(Tile(self, 'pit', x, y))
                 elif level[y][x] == '@':
-                    Tile(self, 'empty', x, y)
+                    Tile(self, k, x, y)
                     new_player = Hero(self, (x, y))
         # вернем игрока, а также размер поля в клетках
         return new_player, x, y
@@ -307,10 +341,6 @@ class ShooterGame(pygame.sprite.Sprite):
                     return  # начинаем игру
             pygame.display.flip()
             self.clock.tick(self.fps)
-
-    def location3(self):
-        self.screen.fill(pygame.Color('black'))
-
 
     def end_screen(self, time=1, timez=7):
 
