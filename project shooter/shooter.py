@@ -67,6 +67,7 @@ def load_image(name, colorkey=None):
 class Tile(pygame.sprite.Sprite):
     def __init__(self, sh, tile_type, pos_x, pos_y):
         super().__init__(sh.all_sprites)
+        self.type = tile_type
         tile_images = {
             'fin': sh.load_image('fin.png'),
             'wall': sh.load_image('preg.png'),
@@ -143,6 +144,11 @@ class Hero(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(self, self.sh.F, False):
             print("yes")
             sh.end_screen()
+        if pygame.sprite.spritecollide(self, self.sh.L, False):
+            print(pygame.sprite.spritecollide(self, self.sh.L, False)[0].type)
+            if pygame.sprite.spritecollide(self, self.sh.L, False)[0].type == "pit":
+                print("yes")
+                sh.end_screen()
     def test(self):
         if pygame.sprite.spritecollide(self, self.sh.L, False):
             print("y")
@@ -192,9 +198,7 @@ class ShooterGame(pygame.sprite.Sprite):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.terminate()
-                if event.type == pygame.KEYDOWN and event.key == 102:
-                    self.b = 102
-                    self.p = self.L
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
                     self.hero.test()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_1:
                     live -= 1
@@ -337,8 +341,8 @@ class ShooterGame(pygame.sprite.Sprite):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.terminate()
-                elif event.type == pygame.KEYDOWN and event.key == 103:
-                    return  # начинаем игру
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_g:
+                    return event.key
             pygame.display.flip()
             self.clock.tick(self.fps)
 
@@ -377,5 +381,3 @@ if __name__ == '__main__':
     sh = ShooterGame()
     sh.start_screen()
     sh.run_game()
-    sh.player_group()
-    sh.end_screen()
