@@ -71,7 +71,12 @@ class Tile(pygame.sprite.Sprite):
             'fin': sh.load_image('fin.png'),
             'wall': sh.load_image('preg.png'),
             'empty': sh.load_image('grass.jpg'),
-            'base': sh.load_image('basement.jpg')
+            'base': sh.load_image('basement.jpg'),
+            'wl': sh.load_image('wall_left.jpg'),
+            'wu': sh.load_image('wall_up.jpg'),
+            'wd': sh.load_image('wall_down.jpg'),
+            'wr': sh.load_image('wall_right.jpg')
+
         }
 
         self.image = tile_images[tile_type]
@@ -133,7 +138,8 @@ class Hero(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(self, self.sh.L, False):
             print("y")
             self.sh.m = "map3.txt"
-            self.sh.hero, level_x, level_y = self.sh.generate_level(self.load_level(self.m))
+            self.sh.hero, level_x, level_y = self.sh.generate_level(self.sh.load_level(self.sh.m))
+
 
 class ShooterGame(pygame.sprite.Sprite):
     def __init__(self, *group):
@@ -233,11 +239,23 @@ class ShooterGame(pygame.sprite.Sprite):
             for x in range(len(level[y])):
                 if level[y][x] == '.':
                     Tile(self, 'empty', x, y)
+                if level[y][x] == ',':
+                    Tile(self, 'empty', x, y)
                 elif level[y][x] == '#':
                     self.tiles_group.add(Tile(self, 'wall', x, y))
+                elif level[y][x] == 'D':
+                    self.tiles_group.add(Tile(self, 'wd', x, y))
+                elif level[y][x] == 'L':
+                    self.tiles_group.add(Tile(self, 'wl', x, y))
+                elif level[y][x] == 'U':
+                    self.tiles_group.add(Tile(self, 'wu', x, y))
+                elif level[y][x] == 'R':
+                    self.tiles_group.add(Tile(self, 'wr', x, y))
                 elif level[y][x] == 'F':
                     self.F.add(Tile(self, 'fin', x, y))
                 elif level[y][x] == 'L':
+                    self.L.add(Tile(self, 'base', x, y))
+                elif level[y][x] == 'P':
                     self.L.add(Tile(self, 'base', x, y))
                 elif level[y][x] == '@':
                     Tile(self, 'empty', x, y)
