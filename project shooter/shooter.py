@@ -27,6 +27,8 @@ class Bullet(pygame.sprite.Sprite):
         # Удаляем пулю, если она выходит за границы экрана
         if not self.sh.screen.get_rect().colliderect(self.rect):
             self.kill()
+        if pygame.sprite.spritecollide(self, self.sh.tiles_group, False):
+            self.kill()
 
 class Camera:
     # зададим начальный сдвиг камеры
@@ -114,6 +116,7 @@ class Hero(pygame.sprite.Sprite):
         if self.sh.dir == 3:
             self.image = pygame.transform.scale(sh.load_image(Hero.hero_images['down']),
                                                 (self.sh.tile_width, self.sh.tile_height))
+        pygame.display.flip()
 
     def move(self, pos):
         self.rotate()
@@ -129,13 +132,15 @@ class Hero(pygame.sprite.Sprite):
     def test(self):
         if pygame.sprite.spritecollide(self, self.sh.L, False):
             print("y")
-            self.sh.load_image("3location.jpg")
+            self.sh.m = "map3.txt"
+            self.sh.hero, level_x, level_y = self.sh.generate_level(self.load_level(self.m))
 
 class ShooterGame(pygame.sprite.Sprite):
     def __init__(self, *group):
         pygame.init()
         self.dir = int()
         self.b = int()
+        self.m = 'map1.txt'
         self.all_sprites = pygame.sprite.Group()
         self.tiles_group = pygame.sprite.Group()
         self.bullets_group = pygame.sprite.Group()
@@ -149,7 +154,7 @@ class ShooterGame(pygame.sprite.Sprite):
         self.screen = pygame.display.set_mode((self.width, self.height))
         self.camera = Camera()
         pygame.display.set_caption('ShooterGame')
-        self.hero, level_x, level_y = self.generate_level(self.load_level('map1.txt'))
+        self.hero, level_x, level_y = self.generate_level(self.load_level(self.m))
         self.fps = 30
 
     def run_game(self):
@@ -191,13 +196,13 @@ class ShooterGame(pygame.sprite.Sprite):
                 for sprite in self.all_sprites:
                     self.camera.apply(sprite)
 
-                self.bullets_group.update()
-                self.all_sprites.draw(self.screen)
-                self.tiles_group.draw(self.screen)
-                self.player_group.update()
-                self.player_group.draw(self.screen)
-                pygame.display.flip()
-                self.clock.tick(self.fps)
+            self.bullets_group.update()
+            self.all_sprites.draw(self.screen)
+            self.tiles_group.draw(self.screen)
+            self.player_group.update()
+            self.player_group.draw(self.screen)
+            pygame.display.flip()
+            self.clock.tick(self.fps)
 
                 # обновляем положение всех спрайтов
 
