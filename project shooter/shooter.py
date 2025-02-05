@@ -112,7 +112,7 @@ class Enemy(pygame.sprite.Sprite):
         player_x, player_y = self.sh.hero.rect.center
         enemy_x, enemy_y = self.rect.center
 
-        if player_x > enemy_x:
+        if player_x > enemy_x: #
             step_x = self.speed
         elif player_x < enemy_x:
             step_x = -self.speed
