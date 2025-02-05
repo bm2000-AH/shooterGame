@@ -85,10 +85,11 @@ class Tile(pygame.sprite.Sprite):
             'rd': sh.load_image('wall_colliderd.jpg'),
             'ru': sh.load_image('wall_collideru.jpg'),
             'lu': sh.load_image('wall_collidelu.jpg'),
-            'ld': sh.load_image('wall_collideld.jpg')
+            'ld': sh.load_image('wall_collideld.jpg'),
+            'ch': sh.load_image('chest.jpg'),
+            'sv': sh.load_image('svecha.jpg')
 
         }
-
         self.image = tile_images[tile_type]
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(
@@ -146,9 +147,24 @@ class Hero(pygame.sprite.Sprite):
             sh.end_screen()
         if pygame.sprite.spritecollide(self, self.sh.L, False):
             print(pygame.sprite.spritecollide(self, self.sh.L, False)[0].type)
+            if pygame.sprite.spritecollide(self, self.sh.L, False)[0].type == "stair":
+                self.sh.dir = int()
+                self.sh.b = int()
+                self.sh.m = 'map1.txt'
+                self.sh.all_sprites = pygame.sprite.Group()
+                self.sh.tiles_group = pygame.sprite.Group()
+                self.sh.bullets_group = pygame.sprite.Group()
+                self.sh.til = pygame.sprite.Group()
+                self.sh.F = pygame.sprite.Group()
+                self.sh.L = pygame.sprite.Group()
+                self.sh.player_group = pygame.sprite.Group()
+                self.sh.camera = Camera()
+                self.sh.hero, level_x, level_y = self.sh.generate_level(self.sh.load_level(self.sh.m))
+                sh.run_game()
+
             if pygame.sprite.spritecollide(self, self.sh.L, False)[0].type == "pit":
                 print("yes")
-                sh.end_screen()
+                sh.endall()
     def test(self):
         if pygame.sprite.spritecollide(self, self.sh.L, False):
             print("y")
@@ -168,6 +184,7 @@ class ShooterGame(pygame.sprite.Sprite):
     def __init__(self, *group):
         pygame.init()
         self.dir = int()
+        self.l = 1
         self.b = int()
         self.m = 'map1.txt'
         self.all_sprites = pygame.sprite.Group()
@@ -189,12 +206,11 @@ class ShooterGame(pygame.sprite.Sprite):
     def run_game(self):
         run = True
         live = 3
-        l = 1
 
         while run:
-            if l == 1:
+            if self.l == 1:
                 self.start_screen()
-                l = 0
+                self.l = 0
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.terminate()
@@ -242,6 +258,19 @@ class ShooterGame(pygame.sprite.Sprite):
         pygame.quit()
         sys.exit()
 
+    def endall(self):
+        print("ye")
+        self.m = "map31.txt"
+        self.all_sprites = pygame.sprite.Group()
+        self.tiles_group = pygame.sprite.Group()
+        self.bullets_group = pygame.sprite.Group()
+        self.til = pygame.sprite.Group()
+        self.F = pygame.sprite.Group()
+        self.L = pygame.sprite.Group()
+        self.player_group = pygame.sprite.Group()
+        self.screen.fill((17, 11, 25))
+        self.hero, level_x, level_y = self.generate_level(self.load_level(self.m))
+
     def load_level(self, filename):
         filename = "photo/" + filename
         # читаем уровень, убирая символы перевода строки
@@ -264,6 +293,10 @@ class ShooterGame(pygame.sprite.Sprite):
                     Tile(self, 'empty', x, y)
                 elif level[y][x] == 'H':
                     Tile(self, 'hatch', x, y)
+                elif level[y][x] == 'V':
+                    Tile(self, 'sv', x, y)
+                elif level[y][x] == 'J':
+                    Tile(self, 'ch', x, y)
                 elif level[y][x] == '(':
                     Tile(self, 'ld', x, y)
                 elif level[y][x] == ')':
