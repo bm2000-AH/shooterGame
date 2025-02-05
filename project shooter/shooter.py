@@ -5,6 +5,7 @@ import random
 
 from pygame.constants import K_DOWN, K_LEFT, K_UP, K_RIGHT
 
+
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, sh, x, y, direction):
         super().__init__(sh.bullets_group, sh.all_sprites)
@@ -29,6 +30,7 @@ class Bullet(pygame.sprite.Sprite):
             self.kill()
         if pygame.sprite.spritecollide(self, self.sh.tiles_group, False):
             self.kill()
+
 
 class Camera:
     # зададим начальный сдвиг камеры
@@ -94,6 +96,42 @@ class Tile(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(
             sh.tile_width * pos_x, sh.tile_height * pos_y)
+
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, sh, pos):
+        super().__init__(sh.enemy_group, sh.all_sprites)
+        self.sh = sh
+        self.image = pygame.transform.scale(sh.load_image('enemy.png'),
+                                            (self.sh.tile_width, self.sh.tile_height))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (sh.tile_width * pos[0], sh.tile_height * pos[1])
+        self.speed = 2  # Скорость движения врага
+
+    def update(self):
+        player_x, player_y = self.sh.hero.rect.center
+        enemy_x, enemy_y = self.rect.center
+
+        if player_x > enemy_x:
+            step_x = self.speed
+        elif player_x < enemy_x:
+            step_x = -self.speed
+        else:
+            step_x = 0
+
+        if player_y > enemy_y:
+            step_y = self.speed
+        elif player_y < enemy_y:
+            step_y = -self.speed
+        else:
+            step_y = 0
+
+        self.rect.x += step_x
+        self.rect.y += step_y
+
+        # Проверка столкновения с игроком
+        if pygame.sprite.collide_rect(self, self.sh.hero):
+            self.sh.end_screen()
 
 
 class Hero(pygame.sprite.Sprite):
@@ -165,6 +203,7 @@ class Hero(pygame.sprite.Sprite):
             if pygame.sprite.spritecollide(self, self.sh.L, False)[0].type == "pit":
                 print("yes")
                 sh.endall()
+
     def test(self):
         if pygame.sprite.spritecollide(self, self.sh.L, False):
             print("y")
@@ -189,6 +228,7 @@ class ShooterGame(pygame.sprite.Sprite):
         self.m = 'map1.txt'
         self.all_sprites = pygame.sprite.Group()
         self.tiles_group = pygame.sprite.Group()
+        self.enemy_group = pygame.sprite.Group()
         self.bullets_group = pygame.sprite.Group()
         self.til = pygame.sprite.Group()
         self.F = pygame.sprite.Group()
@@ -240,6 +280,7 @@ class ShooterGame(pygame.sprite.Sprite):
                     self.camera.apply(sprite)
 
             self.bullets_group.update()
+            self.enemy_group.update()
             self.all_sprites.draw(self.screen)
             self.tiles_group.draw(self.screen)
             self.player_group.update()
@@ -247,7 +288,7 @@ class ShooterGame(pygame.sprite.Sprite):
             pygame.display.flip()
             self.clock.tick(self.fps)
 
-                # обновляем положение всех спрайтов
+            # обновляем положение всех спрайтов
 
             if live == 0:
                 self.end_screen()
@@ -331,6 +372,8 @@ class ShooterGame(pygame.sprite.Sprite):
                 elif level[y][x] == '@':
                     Tile(self, k, x, y)
                     new_player = Hero(self, (x, y))
+                elif level[y][x] == 'E':
+                    Enemy(self, (x, y))
         # вернем игрока, а также размер поля в клетках
         return new_player, x, y
 
