@@ -11,6 +11,7 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self, sh, x, y, direction):
         super().__init__(sh.bullets_group, sh.all_sprites)
         self.sh = sh
+        self.score = 0
         self.image = pygame.transform.scale(sh.load_image('bullet.png'), (15, 15))
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = 10
@@ -32,6 +33,7 @@ class Bullet(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(self, self.sh.tiles_group, False):
             self.kill()
         if pygame.sprite.spritecollide(self, self.sh.enemy_group, True):
+            self.sh.score += 10
             self.kill()
 
 
@@ -180,11 +182,11 @@ class Hero(pygame.sprite.Sprite):
         self.rect.x += pos[0]
         self.rect.y += pos[1]
         if pygame.sprite.spritecollide(self, self.sh.tiles_group, False):
-            print("hi")
+            print("йоу")
             self.rect.x -= pos[0]
             self.rect.y -= pos[1]
         if pygame.sprite.spritecollide(self, self.sh.F, False):
-            print("yes")
+            print("iiiii")
             sh.end_screen()
         if pygame.sprite.spritecollide(self, self.sh.L, False):
             print(pygame.sprite.spritecollide(self, self.sh.L, False)[0].type)
@@ -208,8 +210,37 @@ class Hero(pygame.sprite.Sprite):
                 sh.endall()
 
     def test(self):
+        a = [
+            "Напишите наименьшее натуральное число x, для которого истинно высказывание: ((x > 3) И НЕ (x < 4)) ИЛИ (x < 1).",
+            "4"]
+        b = ["Напишите наибольшее целое число x, для которого истинно высказывание: НЕ (X <= 3) И НЕ (X >= 7).", "6"]
+        c = [
+            "В одной из кодировок Unicode каждый символ кодируется 8 битами. Ученица написала текст (в нем нет лишних пробелов): «Предметы мебели: пуф, стул, диван, кресло, кровать, тумбочка, оттоманка, полукресло, раскладушка». Ученица удалила из списка название одного из предмета. Заодно она вычеркнула ставшие лишними запятые и пробелы— два пробела не должны идти подряд. При этом размер нового предложения в данной кодировке оказался на 11 байт меньше, чем размер исходного предложения. Напишите в ответе удаленное название предмета.",
+            "оттоманка"]
+        p = [
+            "У исполнителя Альфа две команды. которым присвоены номера: 1. Вычти b; 2. Умножь на 5. (b— неизвестное натуральное число). Выполняя первую из них, Альфа уменьшает число на экране на b, а выполняя вторую, умножает это число на 5. Программа для исполнителя Альфа— это последовательность номеров команд. Известно, что программа 21121 переводит число 2 в число 17. Определите значение b.",
+            "3"]
+        h = [
+            "Доступ к файлу com.xls, находящемуся на сервере tt.com, осуществляется по протоколу http. Фрагменты адреса файла закодированы буквами от А до Ж. Запишите последовательность этих букв, кодирующую адрес указанного файла в сети Интернет. А)com Б)xls В)com. Г)http Д)tt. Е)/ Ж)://",
+            "ГЖДАЕВБ"]
+        k = ["Переведите двоичное число 1100110 в десятичную систему счисления.", "102"]
+        d = random.choice([a, b, c, p, h, k])
+        chs = 0
         if pygame.sprite.spritecollide(self, self.sh.L, False):
             if pygame.sprite.spritecollide(self, self.sh.L, False)[0].type == "base":
+                print(d[0])
+                vvod = str(input())
+                while d[1] != vvod:
+                    chs += 1
+                    self.sh.score -= 2
+                    if self.sh.score <= 0:
+                        self.sh.score = 0
+                    print("Попробуй еще раз")
+                    vvod = str(input())
+                if chs > 0:
+                    self.sh.score += 2
+                else:
+                    self.sh.score += 5
                 print("yes")
                 sh.endall()
                 print("y")
@@ -232,6 +263,7 @@ class Hero(pygame.sprite.Sprite):
 class ShooterGame(pygame.sprite.Sprite):
     def __init__(self, *group):
         pygame.init()
+        self.score = 0
         self.dir = int()
         self.l = 1
         self.b = int()
@@ -308,7 +340,7 @@ class ShooterGame(pygame.sprite.Sprite):
                 self.l = 1
 
     def quest(self):
-        rand = ["quest1.png", "quest2.png", "quest3.png",]
+        rand = ["quest1.png", "quest2.png", "quest3.png", ]
         frand = random.choice(rand)
         k = ""
         f = 89
@@ -343,6 +375,7 @@ class ShooterGame(pygame.sprite.Sprite):
                     return
             elif frand == "quest1.png" and k > 5:
                 k = 0
+
     def terminate(self):
         pygame.quit()
         sys.exit()
@@ -374,7 +407,7 @@ class ShooterGame(pygame.sprite.Sprite):
 
     def generate_level(self, level):
         k = ""
-        new_player, x, y = None, None, None
+        new_player, self.x, self.y = None, None, None
         for y in range(len(level)):
             for x in range(len(level[y])):
                 if level[y][x] == '.':
@@ -474,7 +507,7 @@ class ShooterGame(pygame.sprite.Sprite):
 
     def end_screen(self):
         self.end_time = time.time()
-        intro_text = [f"Общее время: {round(self.end_time - self.start_time, 2)}"]
+        intro_text = [f"Общее время: {round(self.end_time - self.start_time, 2)}", f"Количество очков: {self.score}"]
 
         fon = pygame.transform.scale(self.load_image('fie.webp'), (self.width, self.height))
         self.screen.blit(fon, (0, 0))
