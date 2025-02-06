@@ -209,17 +209,24 @@ class Hero(pygame.sprite.Sprite):
 
     def test(self):
         if pygame.sprite.spritecollide(self, self.sh.L, False):
-            print("y")
-            self.sh.m = "map3.txt"
-            self.sh.all_sprites = pygame.sprite.Group()
-            self.sh.tiles_group = pygame.sprite.Group()
-            self.sh.bullets_group = pygame.sprite.Group()
-            self.sh.til = pygame.sprite.Group()
-            self.sh.F = pygame.sprite.Group()
-            self.sh.L = pygame.sprite.Group()
-            self.sh.player_group = pygame.sprite.Group()
-            self.sh.screen.fill((17, 11, 25))
-            self.sh.hero, level_x, level_y = self.sh.generate_level(self.sh.load_level(self.sh.m))
+            if pygame.sprite.spritecollide(self, self.sh.L, False)[0].type == "base":
+                print("yes")
+                sh.endall()
+                print("y")
+                self.sh.m = "map3.txt"
+                self.sh.all_sprites = pygame.sprite.Group()
+                self.sh.tiles_group = pygame.sprite.Group()
+                self.sh.bullets_group = pygame.sprite.Group()
+                self.sh.til = pygame.sprite.Group()
+                self.sh.F = pygame.sprite.Group()
+                self.sh.L = pygame.sprite.Group()
+                self.sh.player_group = pygame.sprite.Group()
+                self.sh.screen.fill((17, 11, 25))
+                self.sh.hero, level_x, level_y = self.sh.generate_level(self.sh.load_level(self.sh.m))
+            if pygame.sprite.spritecollide(self, self.sh.L, False):
+                if pygame.sprite.spritecollide(self, self.sh.L, False)[0].type == "A":
+                    print("ch")
+                    self.sh.quest()
 
 
 class ShooterGame(pygame.sprite.Sprite):
@@ -251,7 +258,6 @@ class ShooterGame(pygame.sprite.Sprite):
     def run_game(self):
         run = True
         live = 3
-
 
         while run:
             if self.l == 1:
@@ -301,6 +307,42 @@ class ShooterGame(pygame.sprite.Sprite):
                 live = 3
                 self.l = 1
 
+    def quest(self):
+        rand = ["quest1.png", "quest2.png", "quest3.png",]
+        frand = random.choice(rand)
+        k = ""
+        f = 89
+        kf = f
+        k2 = 1
+        k1 = 2
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.terminate()
+                elif event.type == pygame.KEYDOWN:
+                    if event.type == pygame.K_1:
+                        k += "1"
+                    if event.type == pygame.K_2:
+                        k += "2"
+                line = [f"                            Вы ввели:{k}"]
+                fon = pygame.transform.scale(self.load_image('quest1.png'), (self.width, self.height))
+                self.screen.blit(fon, (0, 0))
+                font = pygame.font.Font(None, 30)
+                text_coord = 50
+                string_rendered = font.render(line, 1, pygame.Color('Brown'))
+                intro_rect = string_rendered.get_rect()
+                intro_rect.top = text_coord
+                self.screen.blit(string_rendered, intro_rect)
+            if frand == "quest1.png" and k <= 5:
+                for el in k:
+                    if el == "1" and int(el) % 2 == 0:
+                        kf = kf / 2
+                    if el == "1" and int(el) % 2 == 0:
+                        kf = kf + 1
+                if kf == 24:
+                    return
+            elif frand == "quest1.png" and k > 5:
+                k = 0
     def terminate(self):
         pygame.quit()
         sys.exit()
@@ -342,8 +384,10 @@ class ShooterGame(pygame.sprite.Sprite):
                     Tile(self, 'hatch', x, y)
                 elif level[y][x] == 'V':
                     Tile(self, 'sv', x, y)
+                elif level[y][x] == 'A':
+                    Tile(self, 'pol', x, y)
                 elif level[y][x] == 'J':
-                    Tile(self, 'ch', x, y)
+                    self.tiles_group.add(Tile(self, 'ch', x, y))
                 elif level[y][x] == '(':
                     Tile(self, 'ld', x, y)
                 elif level[y][x] == ')':
@@ -446,25 +490,21 @@ class ShooterGame(pygame.sprite.Sprite):
             self.screen.blit(string_rendered, intro_rect)
         fon = pygame.transform.scale(self.load_image('fie.webp'), (self.width, self.height - 200))
         self.screen.blit(fon, (-20, 150))
-
+        b = 0
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.terminate()
                 elif event.type == pygame.KEYDOWN or \
                         event.type == pygame.MOUSEBUTTONDOWN:
-                    self.m = "map1.txt"
-                    self.all_sprites = pygame.sprite.Group()
-                    self.tiles_group = pygame.sprite.Group()
-                    self.bullets_group = pygame.sprite.Group()
-                    self.til = pygame.sprite.Group()
-                    self.F = pygame.sprite.Group()
-                    self.L = pygame.sprite.Group()
-                    self.player_group = pygame.sprite.Group()
-                    self.hero, level_x, level_y = self.generate_level(self.load_level(self.m))
-                    return  # начинаем игру
+                    b = 1
+                    break  # начинаем игру
             pygame.display.flip()
             self.clock.tick(self.fps)
+            if b == 1:
+                break
+        self.screen.fill((81, 153, 41))
+        self.run_game()
 
 
 if __name__ == '__main__':
