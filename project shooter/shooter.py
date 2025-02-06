@@ -1,6 +1,7 @@
 import pygame
 import os
 import sys
+import time
 import random
 
 from pygame.constants import K_DOWN, K_LEFT, K_UP, K_RIGHT
@@ -244,10 +245,13 @@ class ShooterGame(pygame.sprite.Sprite):
         pygame.display.set_caption('ShooterGame')
         self.hero, level_x, level_y = self.generate_level(self.load_level(self.m))
         self.fps = 30
+        self.start_time = time.time()
+        self.end_time = time.time()
 
     def run_game(self):
         run = True
         live = 3
+
 
         while run:
             if self.l == 1:
@@ -295,7 +299,7 @@ class ShooterGame(pygame.sprite.Sprite):
             if live == 0:
                 self.end_screen()
                 live = 3
-                l = 1
+                self.l = 1
 
     def terminate(self):
         pygame.quit()
@@ -424,10 +428,9 @@ class ShooterGame(pygame.sprite.Sprite):
             pygame.display.flip()
             self.clock.tick(self.fps)
 
-    def end_screen(self, time=1, timez=7):
-
-        intro_text = [f"Общее время: {time}",
-                      f"Время потраченное на задания: {timez}"]
+    def end_screen(self):
+        self.end_time = time.time()
+        intro_text = [f"Общее время: {round(self.end_time - self.start_time, 2)}"]
 
         fon = pygame.transform.scale(self.load_image('fie.webp'), (self.width, self.height))
         self.screen.blit(fon, (0, 0))
@@ -450,6 +453,15 @@ class ShooterGame(pygame.sprite.Sprite):
                     self.terminate()
                 elif event.type == pygame.KEYDOWN or \
                         event.type == pygame.MOUSEBUTTONDOWN:
+                    self.m = "map1.txt"
+                    self.all_sprites = pygame.sprite.Group()
+                    self.tiles_group = pygame.sprite.Group()
+                    self.bullets_group = pygame.sprite.Group()
+                    self.til = pygame.sprite.Group()
+                    self.F = pygame.sprite.Group()
+                    self.L = pygame.sprite.Group()
+                    self.player_group = pygame.sprite.Group()
+                    self.hero, level_x, level_y = self.generate_level(self.load_level(self.m))
                     return  # начинаем игру
             pygame.display.flip()
             self.clock.tick(self.fps)
