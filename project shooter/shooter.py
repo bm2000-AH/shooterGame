@@ -183,6 +183,7 @@ class Hero(pygame.sprite.Sprite):
         self.rect.y += pos[1]
         if pygame.sprite.spritecollide(self, self.sh.tiles_group, False):
             print("йоу")
+            self.sh.score += 10
             self.rect.x -= pos[0]
             self.rect.y -= pos[1]
         if pygame.sprite.spritecollide(self, self.sh.F, False):
@@ -289,7 +290,6 @@ class ShooterGame(pygame.sprite.Sprite):
 
     def run_game(self):
         run = True
-        live = 3
 
         while run:
             if self.l == 1:
@@ -334,10 +334,6 @@ class ShooterGame(pygame.sprite.Sprite):
 
             # обновляем положение всех спрайтов
 
-            if live == 0:
-                self.end_screen()
-                live = 3
-                self.l = 1
 
     def quest(self):
         rand = ["quest1.png", "quest2.png", "quest3.png", ]
@@ -530,6 +526,7 @@ class ShooterGame(pygame.sprite.Sprite):
                     self.terminate()
                 elif event.type == pygame.KEYDOWN or \
                         event.type == pygame.MOUSEBUTTONDOWN:
+                    return
                     b = 1
                     break  # начинаем игру
             pygame.display.flip()
