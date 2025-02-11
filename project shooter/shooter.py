@@ -182,15 +182,12 @@ class Hero(pygame.sprite.Sprite):
         self.rect.x += pos[0]
         self.rect.y += pos[1]
         if pygame.sprite.spritecollide(self, self.sh.tiles_group, False):
-            print("йоу")
             self.sh.score += 10
             self.rect.x -= pos[0]
             self.rect.y -= pos[1]
         if pygame.sprite.spritecollide(self, self.sh.F, False):
-            print("iiiii")
             sh.end_screen()
         if pygame.sprite.spritecollide(self, self.sh.L, False):
-            print(pygame.sprite.spritecollide(self, self.sh.L, False)[0].type)
             if pygame.sprite.spritecollide(self, self.sh.L, False)[0].type == "stair":
                 self.sh.dir = int()
                 self.sh.b = int()
@@ -207,7 +204,6 @@ class Hero(pygame.sprite.Sprite):
                 sh.run_game()
 
             if pygame.sprite.spritecollide(self, self.sh.L, False)[0].type == "pit":
-                print("yes")
                 sh.endall()
 
     def test(self):
@@ -242,9 +238,7 @@ class Hero(pygame.sprite.Sprite):
                     self.sh.score += 2
                 else:
                     self.sh.score += 5
-                print("yes")
                 sh.endall()
-                print("y")
                 self.sh.m = "map3.txt"
                 self.sh.all_sprites = pygame.sprite.Group()
                 self.sh.tiles_group = pygame.sprite.Group()
@@ -257,7 +251,6 @@ class Hero(pygame.sprite.Sprite):
                 self.sh.hero, level_x, level_y = self.sh.generate_level(self.sh.load_level(self.sh.m))
             if pygame.sprite.spritecollide(self, self.sh.L, False):
                 if pygame.sprite.spritecollide(self, self.sh.L, False)[0].type == "A":
-                    print("ch")
                     self.sh.quest()
 
 
@@ -317,8 +310,6 @@ class ShooterGame(pygame.sprite.Sprite):
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     self.hero.shoot()
-                if event.type == pygame.KEYDOWN:
-                    print(event.key)
                 self.camera.update(self.hero)
                 for sprite in self.all_sprites:
                     self.camera.apply(sprite)
@@ -333,7 +324,6 @@ class ShooterGame(pygame.sprite.Sprite):
             self.clock.tick(self.fps)
 
             # обновляем положение всех спрайтов
-
 
     def quest(self):
         rand = ["quest1.png", "quest2.png", "quest3.png", ]
@@ -377,7 +367,6 @@ class ShooterGame(pygame.sprite.Sprite):
         sys.exit()
 
     def endall(self):
-        print("ye")
         self.m = "map31.txt"
         self.all_sprites = pygame.sprite.Group()
         self.tiles_group = pygame.sprite.Group()
